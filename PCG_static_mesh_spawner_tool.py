@@ -4,11 +4,12 @@ from pathlib import Path
 
 def load_graph_from_selection():
     graph = unreal.EditorUtilityLibrary.get_selected_assets()
+    
     for i in graph:
-        try:
+        if isinstance(i, unreal.PCGGraph):
             return unreal.PCGGraph.cast(i)
-        except:
-            return
+    
+    return
 
 #user can choose in the property view a graph that is part of default content, including subgraphs used as a default set of tool
 #it's important to check if the user doesn't try to edit default content by mistake
@@ -30,14 +31,14 @@ def get_static_mesh_spawner_list(graph):
 
         #picking only static mesh spawners with weighted mode
         node_interface = n.get_editor_property("settings_interface")
-        try:
+        if isinstance(node_interface, unreal.PCGStaticMeshSpawnerSettings):
             static_mesh_spawner = unreal.PCGStaticMeshSpawnerSettings.cast(node_interface)
-        except:
+        else:
             continue 
         selector_type = static_mesh_spawner.get_editor_property("mesh_selector_parameters")   
-        try:
+        if isinstance(selector_type, unreal.PCGMeshSelectorWeighted):
             weighted = unreal.PCGMeshSelectorWeighted.cast(selector_type)
-        except:
+        else:
             continue
 
         path = unreal.SystemLibrary.get_path_name(weighted)
@@ -88,9 +89,9 @@ def get_selected_meshes():
     output_array = unreal.Array(unreal.StaticMesh)
 
     for a in actors:
-        try:
+        if isinstance(a, unreal.StaticMeshActor):
             mesh_actor = unreal.StaticMeshActor.cast(a)
-        except:
+        else:
             continue
         
         mesh_component = mesh_actor.get_editor_property("static_mesh_component")
@@ -122,9 +123,9 @@ def add_new_node_to_graph(graph, option, x, y, list_entries):
     settings.set_mesh_selector_type(unreal.PCGMeshSelectorWeighted)
     selector_type = settings.get_editor_property("mesh_selector_parameters")   
 
-    try:
+    if isinstance(selector_type, unreal.PCGMeshSelectorWeighted):
         weighted = unreal.PCGMeshSelectorWeighted.cast(selector_type)
-    except:
+    else:
         return
 
     #if the option is "custom" then x and y keep the values; differently, they need to be updated based on the option
@@ -171,14 +172,14 @@ def if_weighted_still_exist (graph, weighted_to_check):
         
     for n in nodes:
         node_interface = n.get_editor_property("settings_interface")
-        try:
+        if isinstance(node_interface, unreal.PCGStaticMeshSpawnerSettings):
             static_mesh_spawner = unreal.PCGStaticMeshSpawnerSettings.cast(node_interface)
-        except:
+        else:
             continue 
         selector_type = static_mesh_spawner.get_editor_property("mesh_selector_parameters")   
-        try:
+        if isinstance(selector_type, unreal.PCGMeshSelectorWeighted):
             weighted = unreal.PCGMeshSelectorWeighted.cast(selector_type)
-        except:
+        else:
             continue
 
         if weighted_to_check == weighted:
